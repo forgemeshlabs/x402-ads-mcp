@@ -1,0 +1,68 @@
+{
+  "name": "@forgemeshlabs/x402-ads-mcp",
+  "version": "0.1.0",
+  "mcpName": "io.github.forgemeshlabs/x402-ads-mcp",
+  "description": "Machine-commerce intent analytics over x402: what autonomous agents probe, want, and abandon across the x402 ecosystem \u2014 trends, category demand, and why-agents-didn't-buy funnels, paid per call in USDC on Base. Free for publishers on their own traffic.",
+  "main": "index.js",
+  "bin": {
+    "x402-ads-mcp": "index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE",
+    "glama.json",
+    "server.json",
+    "Dockerfile"
+  ],
+  "scripts": {
+    "start": "node index.js",
+    "check": "node --check index.js",
+    "test": "node tests/smoke.test.js",
+    "test:free": "node tests/free-tools.test.js",
+    "test:challenge": "node tests/paid-challenge.test.js",
+    "test:all": "npm run check && npm test && npm run test:free && npm run test:challenge"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "x402",
+    "intent",
+    "analytics",
+    "machine-commerce",
+    "agent-economy",
+    "demand",
+    "402",
+    "forgemesh",
+    "coinbase",
+    "base",
+    "usdc",
+    "micropayments"
+  ],
+  "author": "clawdbotworker <clawdbotworker@gmail.com>",
+  "maintainers": [
+    "clawdbotworker <clawdbotworker@gmail.com>"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/forgemeshlabs/x402-ads-mcp.git"
+  },
+  "homepage": "https://ads.forgemesh.io",
+  "bugs": {
+    "url": "https://github.com/forgemeshlabs/x402-ads-mcp/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.1",
+    "@x402/core": "2.11.0",
+    "@x402/evm": "2.11.0",
+    "zod": "^3.25.76",
+    "viem": "^2.0.0"
+  },
+  "overrides": {
+    "ws": "8.21.0"
+  }
+}

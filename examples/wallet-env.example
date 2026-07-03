@@ -1,0 +1,21 @@
+# Environment variables for @forgemeshlabs/x402-ads-mcp
+# Copy the lines you need — every variable is OPTIONAL.
+# With none set: free tools work fully; paid tools return the x402 payment
+# challenge (price, network, payTo) instead of settling. Nothing can spend.
+
+# Enables automatic settlement of paid analytics tools.
+# Use a DEDICATED hot wallet holding only small working balances of USDC on
+# Base mainnet — never your main wallet. The key never leaves your machine;
+# payments are signed locally (EIP-3009) and settle on-chain.
+#WALLET_PRIVATE_KEY=0xYOUR_DEDICATED_HOT_WALLET_KEY
+
+# Publisher free lane: makes get_intent_report FREE for services your key
+# contributes events to. Get one automatically (no emails, no forms):
+#   POST https://ads.forgemesh.io/v1/publishers/register  ($0.10 via x402)
+#X402_ADS_PUBLISHER_KEY=pub_YOUR_PUBLISHER_KEY
+
+# Override the network base URL (default: https://ads.forgemesh.io)
+#X402_ADS_BASE_URL=https://ads.forgemesh.io
+
+# Override the Base mainnet RPC (default: https://mainnet.base.org)
+#BASE_RPC_URL=https://mainnet.base.org
