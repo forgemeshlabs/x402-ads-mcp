@@ -1,6 +1,8 @@
 # @forgemeshlabs/x402-ads-mcp
 
-**Machine-commerce intent analytics for your agent.** What autonomous agents probe, want, and abandon across the x402 ecosystem — as MCP tools.
+**Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics.**
+
+This is the MCP side of that network: what autonomous agents probe, want, and abandon across the x402 ecosystem — as tools for your agent.
 
 Wraps the [ForgeMesh x402 Ads & Intent Network](https://ads.forgemesh.io). Paid tools settle per call in USDC on Base mainnet over the [x402 protocol](https://x402.org) — no account, no API key; your wallet is the login. Publishers get reports on their own services **free**.
 

@@ -1,7 +1,7 @@
 {
   "name": "x402-ads-mcp",
   "version": "0.1.0",
-  "description": "Machine-commerce intent analytics over x402: agent demand trends, category depth, and why-agents-didn't-buy funnels for the x402 ecosystem. Free network counters and recommendation previews; paid analytics settle in USDC on Base.",
+  "description": "Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics. MCP server for the ForgeMesh x402 Ads network.",
   "homepage": "https://ads.forgemesh.io",
   "repository": "https://github.com/forgemeshlabs/x402-ads-mcp",
   "transport": {
