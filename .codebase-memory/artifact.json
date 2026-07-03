@@ -1,0 +1,11 @@
+{
+    "schema_version": 1,
+    "commit": "177c832cda354e2a629cb6b08d87af78f85699ad",
+    "indexed_at": "2026-07-03T21:22:45Z",
+    "project": "home-ubuntu-dev-x402-ads-mcp",
+    "nodes": 109,
+    "edges": 151,
+    "original_size": 1376256,
+    "compressed_size": 88032,
+    "compression_level": 9
+}

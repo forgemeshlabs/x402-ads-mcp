@@ -1,6 +1,6 @@
 {
   "name": "@forgemeshlabs/x402-ads-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "mcpName": "io.github.forgemeshlabs/x402-ads-mcp",
   "description": "Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics. MCP server: 7 tools for agent demand analytics, paid per call in USDC on Base; free for publishers on their own traffic.",
   "main": "index.js",

@@ -28,7 +28,7 @@
       "required": false
     },
     "X402_ADS_PUBLISHER_KEY": {
-      "description": "Optional publisher key from ads.forgemesh.io. Makes get_intent_report free for services you contribute events to.",
+      "description": "Optional publisher key from ads.forgemesh.io. Makes get_intent_report free for your registered services.",
       "required": false
     },
     "X402_ADS_BASE_URL": {

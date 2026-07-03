@@ -73,7 +73,7 @@ const TOOLS = [
     name: "get_intent_report",
     title: "Get Intent Report",
     description:
-      "Why-agents-didn't-buy funnel for one service: bounce funnel, traffic classes, top abandoned endpoints, retry signals. FREE with X402_ADS_PUBLISHER_KEY for services you contribute events to (the data co-op rule); otherwise $0.05 USDC on Base via x402. Without a publisher key or WALLET_PRIVATE_KEY, returns the x402 payment challenge.",
+      "Why-agents-didn't-buy funnel for one service: bounce funnel, traffic classes, top abandoned endpoints, retry signals. FREE with X402_ADS_PUBLISHER_KEY for your registered services (the service id is bound to your key at registration); otherwise $0.05 USDC on Base via x402. Without a publisher key or WALLET_PRIVATE_KEY, returns the x402 payment challenge.",
   },
   {
     name: "get_terms",
