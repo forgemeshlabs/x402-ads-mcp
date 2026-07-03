@@ -1,8 +1,8 @@
 {
   "name": "@forgemeshlabs/x402-ads-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "mcpName": "io.github.forgemeshlabs/x402-ads-mcp",
-  "description": "Machine-commerce intent analytics over x402: what autonomous agents probe, want, and abandon across the x402 ecosystem \u2014 trends, category demand, and why-agents-didn't-buy funnels, paid per call in USDC on Base. Free for publishers on their own traffic.",
+  "description": "Machine-commerce intent analytics over x402: what autonomous agents probe, want, and abandon across the x402 ecosystem — trends, category demand, and why-agents-didn't-buy funnels, paid per call in USDC on Base. Free for publishers on their own traffic.",
   "main": "index.js",
   "bin": {
     "x402-ads-mcp": "index.js"

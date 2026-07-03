@@ -23,6 +23,18 @@ Wraps the [ForgeMesh x402 Ads & Intent Network](https://ads.forgemesh.io). Paid 
 
 Both env vars are optional. With neither set, free tools work fully and paid tools return the x402 payment challenge (price, network, payTo) instead of settling — useful for inspection before spending anything.
 
+## Bonus: one-command publisher registration
+
+This package doubles as the signup CLI for API operators (no MCP client needed):
+
+```bash
+# read the terms first: https://ads.forgemesh.io/terms
+WALLET_PRIVATE_KEY=0xYOUR_WALLET npx -y @forgemeshlabs/x402-ads-mcp register \
+  --url https://api.your-service.com --accept-terms
+```
+
+One $0.10 USDC payment on Base; the paying wallet becomes your identity and your publisher key is printed once. Invalid requests are rejected **before** payment — you can't pay for a doomed registration.
+
 ## Tools
 
 | Tool | Price | What it returns |

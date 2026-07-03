@@ -266,8 +266,64 @@ async function main() {
   process.stdin.on("end", () => clearInterval(keepAlive));
 }
 
+// `npx -y @forgemeshlabs/x402-ads-mcp register` — one-command publisher signup.
+async function registerCli(argv) {
+  const args = { categories: [] };
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--url") args.service_url = argv[++i];
+    else if (argv[i] === "--name") args.name = argv[++i];
+    else if (argv[i] === "--category") args.categories.push(argv[++i]);
+    else if (argv[i] === "--contact") args.contact = argv[++i];
+    else if (argv[i] === "--accept-terms") args.terms_accepted = true;
+  }
+  if (!args.service_url || !args.terms_accepted) {
+    console.error("Usage: WALLET_PRIVATE_KEY=0x... x402-ads-mcp register --url https://api.your-service.com --accept-terms");
+    console.error("       [--name \"My API\"] [--category weather] [--contact you@example.com]");
+    console.error("");
+    console.error("Registers you as a publisher for one $0.10 USDC x402 payment on Base.");
+    console.error("The paying wallet becomes your identity; your key is printed once.");
+    console.error("--accept-terms is required — read them first: " + BASE_URL + "/terms");
+    process.exit(1);
+  }
+  const httpClient = walletClient();
+  if (!httpClient) {
+    console.error("WALLET_PRIVATE_KEY is required: a Base mainnet wallet holding at least $0.10 USDC.");
+    process.exit(1);
+  }
+  if (!args.name) delete args.name;
+  if (!args.contact) delete args.contact;
+  if (!args.categories.length) delete args.categories;
+
+  const url = BASE_URL + "/v1/publishers/register";
+  const init = { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(args) };
+  const res = await fetch(url, init);
+  if (res.status === 400) {
+    const body = await res.json().catch(() => ({}));
+    console.error("Rejected before payment (nothing was charged): " + (body.error || res.statusText));
+    process.exit(1);
+  }
+  if (res.status !== 402) throw new Error(`expected x402 challenge, got ${res.status}`);
+  let challengeBody;
+  try {
+    challengeBody = await res.clone().json();
+  } catch (_) {}
+  const paymentRequired = httpClient.getPaymentRequiredResponse((n) => res.headers.get(n), challengeBody);
+  const paymentPayload = await createChainTimedPaymentPayload(httpClient, paymentRequired);
+  const paidRes = await fetch(url, { ...init, headers: { ...init.headers, ...httpClient.encodePaymentSignatureHeader(paymentPayload) } });
+  const out = await paidRes.json().catch(() => ({}));
+  if (!paidRes.ok) throw new Error(`registration failed (${paidRes.status}): ${JSON.stringify(out).slice(0, 240)}`);
+  console.log("Registered: " + out.publisher_id);
+  console.log("");
+  console.log("Your publisher key (shown once — store it now):");
+  console.log("  " + out.publisher_key);
+  console.log("");
+  console.log("Next: set it as X402_ADS_PUBLISHER_KEY in your server env and mount the");
+  console.log("@forgemeshlabs/x402-ads middleware. Your own traffic reports are free.");
+}
+
 if (require.main === module) {
-  main().catch((error) => {
+  const run = process.argv[2] === "register" ? registerCli(process.argv.slice(3)) : main();
+  run.catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   });
