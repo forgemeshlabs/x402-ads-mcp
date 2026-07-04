@@ -1,12 +1,15 @@
-FROM node:22-slim
+FROM node:20-slim
 
 WORKDIR /app
-ENV NODE_ENV=production
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY index.js README.md server.json glama.json ./
+COPY index.js README.md LICENSE server.json glama.json ./
+
+ENV NODE_ENV=production \
+  X402_ADS_BASE_URL=https://ads.forgemesh.io
+
 USER node
 
-CMD ["node", "index.js"]
+ENTRYPOINT ["node", "index.js"]
