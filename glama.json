@@ -5,6 +5,16 @@
   "maintainers": [
     "clawdbotworker"
   ],
+  "build": {
+    "steps": [
+      "npm ci --omit=dev"
+    ],
+    "cmd": [
+      "node",
+      "index.js"
+    ]
+  },
+  "placeholderArguments": {},
   "tags": [
     "x402",
     "usdc",
