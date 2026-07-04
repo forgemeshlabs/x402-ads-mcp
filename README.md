@@ -1,5 +1,8 @@
 # @forgemeshlabs/x402-ads-mcp
 
+[![x402-ads-mcp MCP server](https://glama.ai/mcp/servers/forgemeshlabs/x402-ads-mcp/badges/score.svg)](https://glama.ai/mcp/servers/forgemeshlabs/x402-ads-mcp)
+[![x402-ads-mcp MCP server](https://glama.ai/mcp/servers/forgemeshlabs/x402-ads-mcp/badges/card.svg)](https://glama.ai/mcp/servers/forgemeshlabs/x402-ads-mcp)
+
 **Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics.**
 
 This is the MCP side of that network: what autonomous agents probe, want, and abandon across the x402 ecosystem — as tools for your agent.
