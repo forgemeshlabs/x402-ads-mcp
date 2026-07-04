@@ -1,45 +1,19 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "name": "x402-ads-mcp",
-  "version": "0.1.0",
+  "name": "@forgemeshlabs/x402-ads-mcp",
   "description": "Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics. MCP server for the ForgeMesh x402 Ads network.",
-  "homepage": "https://ads.forgemesh.io",
-  "repository": "https://github.com/forgemeshlabs/x402-ads-mcp",
   "maintainers": [
     "clawdbotworker"
   ],
-  "transport": {
-    "type": "stdio",
-    "command": "x402-ads-mcp"
-  },
-  "build": {
-    "dockerfile": "Dockerfile",
-    "steps": [
-      "npm ci --omit=dev"
-    ],
-    "cmd": [
-      "node",
-      "index.js"
-    ]
-  },
-  "env": {
-    "WALLET_PRIVATE_KEY": {
-      "description": "Optional Base mainnet wallet private key for settling paid x402 analytics calls. Without it, paid tools return the x402 payment challenge instead of settling.",
-      "required": false
-    },
-    "X402_ADS_PUBLISHER_KEY": {
-      "description": "Optional publisher key from ads.forgemesh.io. Makes get_intent_report free for your registered services.",
-      "required": false
-    },
-    "X402_ADS_BASE_URL": {
-      "description": "Optional intent network base URL.",
-      "required": false,
-      "default": "https://ads.forgemesh.io"
-    },
-    "BASE_RPC_URL": {
-      "description": "Optional Base mainnet RPC URL.",
-      "required": false,
-      "default": "https://mainnet.base.org"
-    }
-  }
+  "tags": [
+    "x402",
+    "usdc",
+    "base",
+    "ads",
+    "intent",
+    "analytics",
+    "machine-commerce",
+    "mcp",
+    "autonomous-agents"
+  ]
 }

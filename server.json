@@ -1,11 +1,50 @@
 {
-  "name": "x402-ads-mcp",
-  "version": "0.1.0",
-  "description": "Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics. MCP server for the ForgeMesh x402 Ads network.",
-  "homepage": "https://ads.forgemesh.io",
-  "repository": "https://github.com/forgemeshlabs/x402-ads-mcp",
-  "transport": {
-    "type": "stdio",
-    "command": "x402-ads-mcp"
-  }
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.forgemeshlabs/x402-ads-mcp",
+  "description": "x402 ad recommendations, intent analytics, and machine-commerce demand reports.",
+  "repository": {
+    "url": "https://github.com/forgemeshlabs/x402-ads-mcp",
+    "source": "github"
+  },
+  "version": "0.1.4",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@forgemeshlabs/x402-ads-mcp",
+      "version": "0.1.4",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "WALLET_PRIVATE_KEY",
+          "description": "Optional dedicated low-balance Base wallet private key for settling paid x402 analytics calls. Without it, paid tools return the x402 payment challenge instead of settling.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "X402_ADS_PUBLISHER_KEY",
+          "description": "Optional publisher key from ads.forgemesh.io. Makes get_intent_report free for your registered services.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "X402_ADS_BASE_URL",
+          "description": "Optional intent network base URL. Defaults to https://ads.forgemesh.io.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "BASE_RPC_URL",
+          "description": "Optional Base mainnet RPC URL. Defaults to https://mainnet.base.org.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
 }
