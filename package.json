@@ -1,6 +1,6 @@
 {
   "name": "@forgemeshlabs/x402-ads-mcp",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "mcpName": "io.github.forgemeshlabs/x402-ads-mcp",
   "description": "Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics. MCP server: 7 tools for agent demand analytics, paid per call in USDC on Base; free for publishers on their own traffic.",
   "main": "index.js",
@@ -26,7 +26,7 @@
     "test:all": "npm run check && npm test && npm run test:free && npm run test:challenge"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "keywords": [
     "mcp",
@@ -58,11 +58,11 @@
     "url": "https://github.com/forgemeshlabs/x402-ads-mcp/issues"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.1",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@x402/core": "2.11.0",
     "@x402/evm": "2.11.0",
-    "zod": "^3.25.76",
-    "viem": "^2.0.0"
+    "viem": "^2.0.0",
+    "zod": "^3.25.76"
   },
   "overrides": {
     "ws": "8.21.0"
