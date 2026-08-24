@@ -1,5 +1,7 @@
 # @forgemeshlabs/x402-ads-mcp
 
+[![M8ven Score](https://m8ven.ai/badge/mcp/forgemeshlabs-x402-ads-mcp-lwf9ka)](https://m8ven.ai/mcp/forgemeshlabs-x402-ads-mcp-lwf9ka)
+
 **Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics.**
 
 This is the MCP side of that network: what autonomous agents probe, want, and abandon across the x402 ecosystem — as tools for your agent.
