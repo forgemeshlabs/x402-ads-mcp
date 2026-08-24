@@ -42,42 +42,84 @@ const TOOLS = [
   {
     name: "get_network_counters",
     title: "Get Network Counters",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     description:
       "Free. Live totals for the ForgeMesh machine-commerce network: 402 responses observed, agent-class requests, recommendations served, services reporting, and x402 services indexed.",
   },
   {
     name: "preview_recommendations",
     title: "Preview Recommendations",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     description:
       "Free. See the exact typed recommendations block (sponsored + similar x402 services) that the @forgemeshlabs/x402-ads middleware would inject into a 402 response for a given endpoint and category.",
   },
   {
     name: "get_network_stats",
     title: "Get Network Stats",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     description:
       "Paid, $0.005 USDC on Base via x402. Network-wide intent stats: total events, services, monitor/indexer/agent traffic classification split, and ad activity. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_intent_trends",
     title: "Get Intent Trends",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     description:
       "Paid, $0.01 USDC on Base via x402. Google-Trends-for-agents: top requested x402 endpoints and categories by autonomous agents, split by traffic class. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_category_demand",
     title: "Get Category Demand",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     description:
       "Paid, $0.02 USDC on Base via x402. Demand depth for one category: probe volume, distinct sources, buyer-class share, price points probed, daily series. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_intent_report",
     title: "Get Intent Report",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     description:
       "Why-agents-didn't-buy funnel for one service: bounce funnel, traffic classes, top abandoned endpoints, retry signals. FREE with X402_ADS_PUBLISHER_KEY for your registered services (the service id is bound to your key at registration); otherwise $0.05 USDC on Base via x402. Without a publisher key or WALLET_PRIVATE_KEY, returns the x402 payment challenge.",
   },
   {
     name: "get_terms",
     title: "Get Terms & Data Disclosure",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     description:
       "Free. The network's canonical terms of service and complete data-collection disclosure: exactly what the middleware sends and never sends.",
   },
@@ -245,6 +287,7 @@ for (const tool of TOOLS) {
       title: tool.title,
       description: tool.description,
       inputSchema: TOOL_SCHEMAS[tool.name],
+      annotations: tool.annotations,
     },
     async (args) => {
       try {
