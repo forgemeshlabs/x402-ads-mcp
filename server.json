@@ -6,12 +6,12 @@
     "url": "https://github.com/forgemeshlabs/x402-ads-mcp",
     "source": "github"
   },
-  "version": "0.1.8",
+  "version": "0.2.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@forgemeshlabs/x402-ads-mcp",
-      "version": "0.1.8",
+      "version": "0.2.2",
       "transport": {
         "type": "stdio"
       },
@@ -44,6 +44,15 @@
           "isSecret": false,
           "format": "string"
         }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://forgemesh.io/favicon.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "1254x1254"
       ]
     }
   ]
