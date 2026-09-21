@@ -1,6 +1,7 @@
 # @forgemeshlabs/x402-ads-mcp
 
 [![M8ven Score](https://m8ven.ai/badge/mcp/forgemeshlabs-x402-ads-mcp-lwf9ka)](https://m8ven.ai/mcp/forgemeshlabs-x402-ads-mcp-lwf9ka)
+[![mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/forgemeshlabs/x402-ads-mcp)
 
 **Install one middleware. Monetize unused 402 responses with recommendations, discovery, and machine commerce analytics.**
 
