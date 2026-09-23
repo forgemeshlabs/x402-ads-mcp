@@ -16,6 +16,7 @@ const BASE_RPC_URL = process.env.BASE_RPC_URL || "https://mainnet.base.org";
 const WINDOWS = ["24h", "7d", "30d", "all"];
 
 const TOOL_SCHEMAS = {
+  list_tools: {},
   get_network_counters: {},
   preview_recommendations: {
     service: z.string().max(120).optional().describe("Your service identifier, used only for self-exclusion in results"),
@@ -39,6 +40,18 @@ const TOOL_SCHEMAS = {
 };
 
 const TOOLS = [
+  {
+    name: "list_tools",
+    title: "List Tools",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+    description:
+      "Free. Lists every x402 Ads tool with its live price, so an agent can pick before paying. Fetches GET /menu with no payment.",
+  },
   {
     name: "get_network_counters",
     title: "Get Network Counters",
@@ -241,6 +254,9 @@ function qs(params) {
 }
 
 async function callTool(name, args = {}) {
+  // list_tools is free: plain fetch of /menu, no wallet, never touches paidGet.
+  // The server may attach a labeled `sponsored` data field; pass it through untouched.
+  if (name === "list_tools") return freeGet("/menu");
   if (name === "get_network_counters") return freeGet("/v1/counters");
 
   if (name === "preview_recommendations") {

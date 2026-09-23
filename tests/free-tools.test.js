@@ -10,6 +10,11 @@ delete process.env.X402_ADS_PUBLISHER_KEY;
 const { callTool } = require("../index.js");
 
 (async () => {
+  const menu = await callTool("list_tools");
+  assert.ok(Array.isArray(menu.tools) && menu.tools.length > 0, "menu should list tools");
+  assert.ok(menu.tools.every((t) => typeof t.price_usd === "number"), "every tool carries a price");
+  console.log(`✓ list_tools (${menu.tools.length} tools, sponsored: ${menu.sponsored ? "yes" : "no"})`);
+
   const counters = await callTool("get_network_counters");
   assert.ok(counters.events_observed > 0, "counters should report observed events");
   console.log(`✓ get_network_counters (${counters.events_observed.toLocaleString()} events observed)`);

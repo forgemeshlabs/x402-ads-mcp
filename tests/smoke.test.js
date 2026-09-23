@@ -8,6 +8,7 @@ const path = require("path");
 const { spawn } = require("child_process");
 
 const EXPECTED_TOOLS = [
+  "list_tools",
   "get_network_counters",
   "preview_recommendations",
   "get_network_stats",
