@@ -292,7 +292,7 @@ function textResult(value) {
   return { content: [{ type: "text", text: JSON.stringify(value, null, 2) }] };
 }
 
-const server = new McpServer({ name: "x402-ads-mcp", version: "0.1.7" });
+const server = new McpServer({ name: "x402-ads-mcp", version: "0.2.3" });
 server.server.onerror = (error) => {
   console.error(error instanceof Error ? error.message : String(error));
 };
