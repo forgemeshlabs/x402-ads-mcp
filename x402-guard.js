@@ -42,13 +42,16 @@ function createGuard(opts) {
   const base = new URL(opts.baseUrl);
   if (base.protocol !== "https:") throw new Error("x402-guard: baseUrl must be https");
   const origin = base.origin;
-  const payTo = new Set((opts.payTo || []).map((a) => String(a).toLowerCase()));
-  if (payTo.size === 0) throw new Error("x402-guard: payTo allowlist is required");
+  // An empty allowlist means "this server never signs payments": the policy refuses every 402 and
+  // only fetchBounded is useful. Pass payTo: [] explicitly for free-only servers.
+  if (!Array.isArray(opts.payTo)) throw new Error("x402-guard: payTo allowlist is required (use [] for a server that never signs)");
+  const payTo = new Set(opts.payTo.map((a) => String(a).toLowerCase()));
   const maxPriceUsd = lowerCap(opts.maxPriceUsd ?? 1.0, "X402_MAX_PRICE_USD");
   const sessionBudgetUsd = lowerCap(opts.sessionBudgetUsd ?? 10.0, "X402_SESSION_BUDGET_USD");
   let spentUsd = 0; // reserved at signing time, never released: a signed authorization can be settled even if our retry fails
 
   function policy(_version, requirements) {
+    if (payTo.size === 0) throw new Error("x402-guard refused to sign: this server has no payee allowlist and never signs payments");
     const kept = requirements.filter((r) => {
       if (r.network !== BASE_MAINNET) return false;
       if (String(r.asset || "").toLowerCase() !== USDC_BASE) return false;
