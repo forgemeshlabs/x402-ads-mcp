@@ -6,12 +6,12 @@
     "url": "https://github.com/forgemeshlabs/x402-ads-mcp",
     "source": "github"
   },
-  "version": "0.2.3",
+  "version": "0.2.4",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@forgemeshlabs/x402-ads-mcp",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "transport": {
         "type": "stdio"
       },
