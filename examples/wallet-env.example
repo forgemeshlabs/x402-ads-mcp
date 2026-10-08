@@ -14,8 +14,6 @@
 #   POST https://ads.forgemesh.io/v1/publishers/register  ($0.10 via x402)
 #X402_ADS_PUBLISHER_KEY=pub_YOUR_PUBLISHER_KEY
 
-# Override the network base URL (default: https://ads.forgemesh.io)
-#X402_ADS_BASE_URL=https://ads.forgemesh.io
-
-# Override the Base mainnet RPC (default: https://mainnet.base.org)
-#BASE_RPC_URL=https://mainnet.base.org
+# Optional spend caps; these can only LOWER the built-in caps ($0.05 per call, $10 per session).
+#X402_MAX_PRICE_USD=0.05
+#X402_SESSION_BUDGET_USD=1

@@ -8,20 +8,23 @@ const { x402Client, x402HTTPClient } = require("@x402/core/client");
 const { ExactEvmScheme } = require("@x402/evm/exact/client");
 const { toClientEvmSigner } = require("@x402/evm");
 const { privateKeyToAccount } = require("viem/accounts");
-const { createPublicClient, http } = require("viem");
-const { base } = require("viem/chains");
+const { createGuard } = require("./x402-guard");
 
-const BASE_URL = (process.env.X402_ADS_BASE_URL || "https://ads.forgemesh.io").replace(/\/+$/, "");
-const BASE_RPC_URL = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+const BASE_URL = "https://ads.forgemesh.io";
+const ADS_PAY_TO = ["0x65E02cB7Fee27630bB7d1a3ADd02Ef7Aa2D21701"];
+// Tool calls cap at the highest tool price ($0.05); the register CLI needs its own $0.10 cap.
+const guard = createGuard({ baseUrl: BASE_URL, payTo: ADS_PAY_TO, maxPriceUsd: 0.05, sessionBudgetUsd: 10 });
+const registerGuard = createGuard({ baseUrl: BASE_URL, payTo: ADS_PAY_TO, maxPriceUsd: 0.1, sessionBudgetUsd: 10 });
 const WINDOWS = ["24h", "7d", "30d", "all"];
+const ID_PATTERN = /^[A-Za-z0-9._:@-]+$/; // service ids and categories: no slashes, spaces or control chars
 
 const TOOL_SCHEMAS = {
   list_tools: {},
   get_network_counters: {},
   preview_recommendations: {
-    service: z.string().max(120).optional().describe("Your service identifier, used only for self-exclusion in results"),
-    endpoint: z.string().max(300).optional().describe("The probed endpoint path, e.g. /api/forecast"),
-    category: z.string().max(60).optional().describe("Category to match recommendations against, e.g. finance, blockchain, images"),
+    service: z.string().max(120).regex(ID_PATTERN).optional().describe("Your service identifier, used only for self-exclusion in results"),
+    endpoint: z.string().max(300).regex(/^\/[A-Za-z0-9/._~%-]*$/).optional().describe("The probed endpoint path, e.g. /api/forecast"),
+    category: z.string().max(60).regex(ID_PATTERN).optional().describe("Category to match recommendations against, e.g. finance, blockchain, images"),
   },
   get_network_stats: {},
   get_intent_trends: {
@@ -29,11 +32,11 @@ const TOOL_SCHEMAS = {
     limit: z.number().int().min(1).max(100).optional().describe("Max rows, 1-100 (default 20)"),
   },
   get_category_demand: {
-    category: z.string().min(1).max(60).describe("Category to measure, e.g. finance, blockchain, images, tts"),
+    category: z.string().min(1).max(60).regex(ID_PATTERN).describe("Category to measure, e.g. finance, blockchain, images, tts"),
     window: z.enum(WINDOWS).optional().describe("Time window: 24h, 7d, 30d, or all (default 30d)"),
   },
   get_intent_report: {
-    service: z.string().min(1).max(120).describe("Service identifier to report on"),
+    service: z.string().min(1).max(120).regex(ID_PATTERN).describe("Service identifier to report on"),
     window: z.enum(WINDOWS).optional().describe("Time window: 24h, 7d, 30d, or all (default 30d)"),
   },
   get_terms: {},
@@ -138,12 +141,13 @@ const TOOLS = [
   },
 ];
 
-function walletClient() {
+function walletClient(g = guard) {
   const key = process.env.WALLET_PRIVATE_KEY;
   if (!key) return null;
   const pk = key.startsWith("0x") ? key : "0x" + key;
   const account = privateKeyToAccount(pk);
-  const coreClient = new x402Client().register("eip155:*", new ExactEvmScheme(toClientEvmSigner(account)));
+  const coreClient = new x402Client().register("eip155:*", new ExactEvmScheme(toClientEvmSigner(account)))
+    .registerPolicy(g.policy);
   return new x402HTTPClient(coreClient);
 }
 
@@ -172,49 +176,26 @@ function slimChallenge(res, body) {
   };
 }
 
-async function createChainTimedPaymentPayload(httpClient, paymentRequired) {
-  try {
-    const publicClient = createPublicClient({ chain: base, transport: http(BASE_RPC_URL) });
-    const block = await publicClient.getBlock();
-    const chainNow = Number(block.timestamp);
-    const originalNow = Date.now;
-    const localNow = Math.floor(originalNow() / 1000);
-    const timeout = Number(paymentRequired.accepts?.[0]?.maxTimeoutSeconds || 300);
-    const signingNow = Math.min(Math.max(chainNow, localNow + 30 - timeout), chainNow + 600);
-    Date.now = () => signingNow * 1000;
-    try {
-      return await httpClient.createPaymentPayload(paymentRequired);
-    } finally {
-      Date.now = originalNow;
-    }
-  } catch (_) {
-    return httpClient.createPaymentPayload(paymentRequired);
-  }
-}
-
 // Challenge-first paid GET: publisher free lane → settle if wallet → structured 402 otherwise.
 async function paidGet(path) {
   const headers = {};
   if (process.env.X402_ADS_PUBLISHER_KEY) headers["x-publisher-key"] = process.env.X402_ADS_PUBLISHER_KEY;
-  const url = BASE_URL + path;
 
-  const res = await fetch(url, { headers });
+  const res = await guard.fetchBounded(path, { headers });
   if (res.ok) {
     const viaPublisherKey = !!process.env.X402_ADS_PUBLISHER_KEY;
-    return { paid: false, ...(viaPublisherKey ? { free_via_publisher_key: true } : {}), data: await res.json() };
+    return { paid: false, ...(viaPublisherKey ? { free_via_publisher_key: true } : {}), data: JSON.parse(res.text) };
   }
-  if (res.status !== 402) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`GET ${path} failed: ${res.status} ${text.slice(0, 240)}`);
-  }
-
-  let challengeBody;
-  try {
-    challengeBody = await res.clone().json();
-  } catch (_) {}
+  if (res.status !== 402) throw new Error(`GET ${path} failed: ${res.status} ${res.text.slice(0, 200)}`);
 
   const httpClient = walletClient();
   if (!httpClient) {
+    let challengeBody;
+    try {
+      challengeBody = JSON.parse(res.text);
+    } catch (_) {
+      challengeBody = undefined; // header carries the full challenge; the body is only a summary
+    }
     return {
       payment_required: true,
       challenge: slimChallenge(res, challengeBody),
@@ -223,26 +204,14 @@ async function paidGet(path) {
     };
   }
 
-  const paymentRequired = httpClient.getPaymentRequiredResponse((name) => res.headers.get(name), challengeBody);
-  const paymentPayload = await createChainTimedPaymentPayload(httpClient, paymentRequired);
-  const paidRes = await fetch(url, {
-    headers: { ...headers, ...httpClient.encodePaymentSignatureHeader(paymentPayload) },
-  });
-  if (!paidRes.ok) {
-    const text = await paidRes.text().catch(() => paidRes.statusText);
-    throw new Error(`Paid call failed: ${paidRes.status} ${text.slice(0, 240)}`);
-  }
-  return {
-    paid: true,
-    payment_response: paidRes.headers.get("payment-response"),
-    data: await paidRes.json(),
-  };
+  const { _payment, ...data } = await guard.callPaid(httpClient, path, { headers });
+  return { paid: true, payment_response: _payment, data };
 }
 
 async function freeGet(path, asText = false) {
-  const res = await fetch(BASE_URL + path);
+  const res = await guard.fetchBounded(path);
   if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
-  return asText ? res.text() : res.json();
+  return asText ? res.text : JSON.parse(res.text);
 }
 
 function qs(params) {
@@ -260,7 +229,7 @@ async function callTool(name, args = {}) {
   if (name === "get_network_counters") return freeGet("/v1/counters");
 
   if (name === "preview_recommendations") {
-    const res = await fetch(BASE_URL + "/v1/decide", {
+    const res = await guard.fetchBounded("/v1/decide", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -270,7 +239,7 @@ async function callTool(name, args = {}) {
       }),
     });
     if (!res.ok) throw new Error(`POST /v1/decide failed: ${res.status}`);
-    return res.json();
+    return JSON.parse(res.text);
   }
 
   if (name === "get_network_stats") return paidGet("/api/network/stats");
@@ -292,7 +261,7 @@ function textResult(value) {
   return { content: [{ type: "text", text: JSON.stringify(value, null, 2) }] };
 }
 
-const server = new McpServer({ name: "x402-ads-mcp", version: "0.2.4" });
+const server = new McpServer({ name: "x402-ads-mcp", version: require("./package.json").version });
 server.server.onerror = (error) => {
   console.error(error instanceof Error ? error.message : String(error));
 };
@@ -344,7 +313,7 @@ async function registerCli(argv) {
     console.error("--accept-terms is required — read them first: " + BASE_URL + "/terms");
     process.exit(1);
   }
-  const httpClient = walletClient();
+  const httpClient = walletClient(registerGuard);
   if (!httpClient) {
     console.error("WALLET_PRIVATE_KEY is required: a Base mainnet wallet holding at least $0.10 USDC.");
     process.exit(1);
@@ -353,24 +322,18 @@ async function registerCli(argv) {
   if (!args.contact) delete args.contact;
   if (!args.categories.length) delete args.categories;
 
-  const url = BASE_URL + "/v1/publishers/register";
-  const init = { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(args) };
-  const res = await fetch(url, init);
-  if (res.status === 400) {
-    const body = await res.json().catch(() => ({}));
-    console.error("Rejected before payment (nothing was charged): " + (body.error || res.statusText));
+  const path = "/v1/publishers/register";
+  const body = JSON.stringify(args);
+  // Pre-flight unpaid request so a rejected body is reported before any payment is attempted.
+  const pre = await registerGuard.fetchBounded(path, { method: "POST", headers: { "content-type": "application/json" }, body });
+  if (pre.status === 400) {
+    let msg = pre.text.slice(0, 200);
+    try { msg = JSON.parse(pre.text).error || msg; } catch (_) { /* keep raw text */ }
+    console.error("Rejected before payment (nothing was charged): " + msg);
     process.exit(1);
   }
-  if (res.status !== 402) throw new Error(`expected x402 challenge, got ${res.status}`);
-  let challengeBody;
-  try {
-    challengeBody = await res.clone().json();
-  } catch (_) {}
-  const paymentRequired = httpClient.getPaymentRequiredResponse((n) => res.headers.get(n), challengeBody);
-  const paymentPayload = await createChainTimedPaymentPayload(httpClient, paymentRequired);
-  const paidRes = await fetch(url, { ...init, headers: { ...init.headers, ...httpClient.encodePaymentSignatureHeader(paymentPayload) } });
-  const out = await paidRes.json().catch(() => ({}));
-  if (!paidRes.ok) throw new Error(`registration failed (${paidRes.status}): ${JSON.stringify(out).slice(0, 240)}`);
+  if (pre.status !== 402) throw new Error(`expected x402 challenge, got ${pre.status}`);
+  const { _payment, ...out } = await registerGuard.callPaid(httpClient, path, { method: "POST", body: args });
   console.log("Registered: " + out.publisher_id);
   console.log("");
   console.log("Your publisher key (shown once — store it now):");

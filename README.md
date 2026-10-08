@@ -60,10 +60,10 @@ One $0.10 USDC payment on Base; the paying wallet becomes your identity and your
 |---|---|---|
 | `WALLET_PRIVATE_KEY` | no | Base mainnet wallet holding USDC; enables automatic settlement of paid tools |
 | `X402_ADS_PUBLISHER_KEY` | no | Publisher key from ads.forgemesh.io; free lane for your own reports |
-| `X402_ADS_BASE_URL` | no | Override the network base URL (default `https://ads.forgemesh.io`) |
-| `BASE_RPC_URL` | no | Override the Base RPC (default `https://mainnet.base.org`) |
+| `X402_MAX_PRICE_USD` | no | Per-call price cap in USD; can only LOWER the built-in cap ($0.05, or $0.10 for `register`) |
+| `X402_SESSION_BUDGET_USD` | no | Cumulative cap per process; can only LOWER the built-in $10 |
 
-Use a dedicated hot wallet holding only small working balances. The key never leaves your machine — payments are signed locally (EIP-3009) and settle on-chain.
+The backend URL is fixed to `https://ads.forgemesh.io` (the publisher key is only ever sent there). The server refuses to sign for any payee other than the ForgeMesh Ads wallet, any network other than Base mainnet, any asset other than USDC, or any amount over the cap. Use a dedicated, low-balance wallet. The key never leaves your machine — payments are signed locally (EIP-3009) and settle on-chain.
 
 Ready-made configs live in [`examples/`](./examples): a Claude Desktop `mcpServers` block and a commented env-var template.
 
