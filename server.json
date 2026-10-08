@@ -29,20 +29,6 @@
           "isRequired": false,
           "isSecret": true,
           "format": "string"
-        },
-        {
-          "name": "X402_ADS_BASE_URL",
-          "description": "Optional intent network base URL. Defaults to https://ads.forgemesh.io.",
-          "isRequired": false,
-          "isSecret": false,
-          "format": "string"
-        },
-        {
-          "name": "BASE_RPC_URL",
-          "description": "Optional Base mainnet RPC URL. Defaults to https://mainnet.base.org.",
-          "isRequired": false,
-          "isSecret": false,
-          "format": "string"
         }
       ]
     }
