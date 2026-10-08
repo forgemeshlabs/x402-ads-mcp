@@ -46,8 +46,7 @@ function createGuard(opts) {
   if (payTo.size === 0) throw new Error("x402-guard: payTo allowlist is required");
   const maxPriceUsd = lowerCap(opts.maxPriceUsd ?? 1.0, "X402_MAX_PRICE_USD");
   const sessionBudgetUsd = lowerCap(opts.sessionBudgetUsd ?? 10.0, "X402_SESSION_BUDGET_USD");
-  let spentUsd = 0;
-  let pendingUsd = 0;
+  let spentUsd = 0; // reserved at signing time, never released: a signed authorization can be settled even if our retry fails
 
   function policy(_version, requirements) {
     const kept = requirements.filter((r) => {
@@ -63,8 +62,10 @@ function createGuard(opts) {
       const seen = requirements.map((r) => `${r.network} ${r.payTo} $${usdFromRequirement(r)}`).join("; ");
       throw new Error(`x402-guard refused to sign: no payment option passed the guard (network must be ${BASE_MAINNET}, asset USDC, payTo in allowlist, price <= $${maxPriceUsd}, session total <= $${sessionBudgetUsd}). Offered: ${seen}`);
     }
-    pendingUsd = Math.min(...kept.map(usdFromRequirement));
-    return kept;
+    // Hand the selector exactly one option so the amount we reserve is the amount that gets signed.
+    const chosen = kept.reduce((a, b) => (usdFromRequirement(b) < usdFromRequirement(a) ? b : a));
+    spentUsd += usdFromRequirement(chosen);
+    return [chosen];
   }
 
   async function fetchBounded(url, init = {}) {
@@ -75,10 +76,21 @@ function createGuard(opts) {
     try {
       const res = await fetch(target.toString(), { ...init, signal: ctrl.signal, redirect: "error" });
       const declared = Number(res.headers.get("content-length") || 0);
-      if (declared > MAX_RESPONSE_BYTES) throw new Error(`x402-guard: response too large (${declared} bytes)`);
-      const text = await res.text();
-      if (text.length > MAX_RESPONSE_BYTES) throw new Error("x402-guard: response too large");
-      return { status: res.status, ok: res.ok, headers: res.headers, text };
+      if (declared > MAX_RESPONSE_BYTES) { ctrl.abort(); throw new Error(`x402-guard: response too large (${declared} bytes)`); }
+      const chunks = [];
+      let received = 0;
+      if (res.body) {
+        const reader = res.body.getReader();
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          received += value.byteLength;
+          if (received > MAX_RESPONSE_BYTES) { ctrl.abort(); throw new Error("x402-guard: response too large"); }
+          chunks.push(value);
+        }
+      }
+      const bytes = Buffer.concat(chunks);
+      return { status: res.status, ok: res.ok, headers: res.headers, bytes, text: bytes.toString("utf8") };
     } finally {
       clearTimeout(timer);
     }
@@ -102,14 +114,15 @@ function createGuard(opts) {
     let challenge;
     try { challenge = JSON.parse(res.text); } catch { challenge = undefined; }
     const paymentRequired = httpClient.getPaymentRequiredResponse((n) => res.headers.get(n), challenge);
-    pendingUsd = 0;
-    const payload = await httpClient.createPaymentPayload(paymentRequired); // policy runs inside
+    const payload = await httpClient.createPaymentPayload(paymentRequired); // policy runs (and reserves budget) inside
     const paid = await fetchBounded(url, { ...init, headers: { ...init.headers, ...httpClient.encodePaymentSignatureHeader(payload) } });
     if (!paid.ok) throw new Error(`Payment failed — HTTP ${paid.status}: ${paid.text.slice(0, 200)}`);
-    spentUsd += pendingUsd;
-    const data = parseJson(paid);
     let settle = null;
     try { settle = httpClient.getPaymentSettleResponse((n) => paid.headers.get(n)) || null; } catch { settle = null; }
+    const contentType = paid.headers.get("content-type") || "";
+    // Non-JSON paid responses (audio, images) come back as raw bytes, never decoded as text.
+    if (!contentType.includes("json")) return { _binary: true, content_type: contentType, bytes: paid.bytes, _payment: settle };
+    const data = parseJson(paid);
     if (settle && data && typeof data === "object" && !Array.isArray(data)) return { ...data, _payment: settle };
     return data;
   }
