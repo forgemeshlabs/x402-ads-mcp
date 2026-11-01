@@ -25,5 +25,6 @@
     "machine-commerce",
     "mcp",
     "autonomous-agents"
-  ]
+  ],
+  "version": "0.2.6"
 }
