@@ -89,7 +89,7 @@ const TOOLS = [
       openWorldHint: true,
     },
     description:
-      "Paid, $0.005 USDC on Base via x402. Network-wide intent stats: total events, services, monitor/indexer/agent traffic classification split, and ad activity. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
+      "Paid, $0.005 USDC on Base via x402. x402 network traffic stats: network-wide totals (events, services), traffic classification split and ad activity. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_intent_trends",
@@ -101,7 +101,7 @@ const TOOLS = [
       openWorldHint: true,
     },
     description:
-      "Paid, $0.01 USDC on Base via x402. Google-Trends-for-agents: top requested x402 endpoints and categories by autonomous agents, split by traffic class. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
+      "Paid, $0.01 USDC on Base via x402. x402 agent demand trends: the most-requested x402 endpoints and categories by autonomous agents in a time window, with total and agent-only probe counts. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_category_demand",
@@ -113,7 +113,7 @@ const TOOLS = [
       openWorldHint: true,
     },
     description:
-      "Paid, $0.02 USDC on Base via x402. Demand depth for one category: probe volume, distinct sources, buyer-class share, price points probed, daily series. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
+      "Paid, $0.02 USDC on Base via x402. x402 category demand depth: probe volume, agent probes, conversions, price points probed and a daily series for one API category. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_intent_report",
@@ -125,7 +125,7 @@ const TOOLS = [
       openWorldHint: true,
     },
     description:
-      "Why-agents-didn't-buy funnel for one service: bounce funnel, traffic classes, top abandoned endpoints, retry signals. FREE with X402_ADS_PUBLISHER_KEY for your registered services (the service id is bound to your key at registration); otherwise $0.05 USDC on Base via x402. Without a publisher key or WALLET_PRIVATE_KEY, returns the x402 payment challenge.",
+      "x402 conversion funnel report for one service (why agents probe but do not pay): bounce funnel, traffic classes, top abandoned endpoints, retry signals. FREE with X402_ADS_PUBLISHER_KEY for your registered services (the service id is bound to your key at registration); otherwise $0.05 USDC on Base via x402. Without a publisher key or WALLET_PRIVATE_KEY, returns the x402 payment challenge.",
   },
   {
     name: "get_terms",
