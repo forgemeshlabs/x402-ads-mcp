@@ -99,12 +99,14 @@ function createGuard(opts) {
     }
   }
 
-  // Keep the service's refusal intact: HTTP status, body (JSON when parseable) and the charged flag.
+  // Keep the service's refusal intact: HTTP status, charged flag, and the body in err.upstream only.
+  // The message is short and fixed; upstream content is untrusted and never interpolated into prose.
   function httpError(res, prefix, charged) {
     let upstream;
     try { upstream = JSON.parse(res.text); } catch { upstream = res.text.slice(0, 500); }
-    const body = typeof upstream === "string" ? upstream : JSON.stringify(upstream).slice(0, 1500);
-    const err = new Error(`${prefix}HTTP ${res.status}: ${body}`);
+    if (typeof upstream !== "string" && JSON.stringify(upstream).length > 1500) upstream = JSON.stringify(upstream).slice(0, 1500);
+    const code = upstream && typeof upstream === "object" && typeof upstream.error === "string" && /^[A-Za-z0-9_.:-]{1,64}$/.test(upstream.error) ? `: ${upstream.error}` : "";
+    const err = new Error(`${prefix}HTTP ${res.status}${code}`);
     err.status = res.status;
     err.upstream = upstream;
     if (charged !== undefined) err.charged = charged;

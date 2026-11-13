@@ -280,7 +280,7 @@ for (const tool of TOOLS) {
       } catch (error) {
         return {
           isError: true,
-          content: [{ type: "text", text: (error instanceof Error ? error.message : String(error)) + (error && typeof error.charged === "boolean" ? ` (charged: ${error.charged})` : "") }],
+          content: [{ type: "text", text: error && error.status !== undefined ? JSON.stringify({ error: error.message, status: error.status, ...(typeof error.charged === "boolean" ? { charged: error.charged } : {}), upstream: error.upstream, untrusted: true }) : error instanceof Error ? error.message : String(error) }],
         };
       }
     }
