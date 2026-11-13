@@ -49,7 +49,7 @@ One $0.10 USDC payment on Base; the paying wallet becomes your identity and your
 | `get_terms` | free | Canonical terms + complete data-collection disclosure |
 | `get_network_stats` | $0.005 | Network totals + monitor/indexer/agent classification split |
 | `get_intent_trends` | $0.01 | Top endpoints & categories autonomous agents request |
-| `get_category_demand` | $0.02 | Demand depth for one category: volume, buyer share, price points |
+| `get_category_demand` | $0.02 | Demand depth for one category: probes, agent probes, conversions, price points (404 no_data is not charged) |
 | `get_intent_report` | $0.05 / **free*** | Why-agents-didn't-buy funnel for one service |
 
 \* `get_intent_report` is free with `X402_ADS_PUBLISHER_KEY` for services you contribute events to — the data co-op rule: your own data is free, forever.

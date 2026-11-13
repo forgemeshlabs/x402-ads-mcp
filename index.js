@@ -32,7 +32,7 @@ const TOOL_SCHEMAS = {
     limit: z.number().int().min(1).max(100).optional().describe("Max rows, 1-100 (default 20)"),
   },
   get_category_demand: {
-    category: z.string().min(1).max(60).regex(ID_PATTERN).describe("Category to measure, e.g. finance, blockchain, images, tts"),
+    category: z.string().min(1).max(60).regex(ID_PATTERN).describe("Category as reported by publishers, e.g. blockchain, developer-tools (get_intent_trends lists categories with data)"),
     window: z.enum(WINDOWS).optional().describe("Time window: 24h, 7d, 30d, or all (default 30d)"),
   },
   get_intent_report: {
@@ -89,7 +89,7 @@ const TOOLS = [
       openWorldHint: true,
     },
     description:
-      "Paid, $0.005 USDC on Base via x402. x402 network traffic stats: network-wide totals (events, services), traffic classification split and ad activity. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
+      "Paid, $0.005 USDC on Base via x402. x402 network traffic stats, no parameters: network-wide totals (x402 events, services), a breakdown of traffic by user-agent class (agent, browser, bot) and ad_activity. Use it to benchmark your service's agent-traffic share. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_intent_trends",
@@ -101,7 +101,7 @@ const TOOLS = [
       openWorldHint: true,
     },
     description:
-      "Paid, $0.01 USDC on Base via x402. x402 agent demand trends: the most-requested x402 endpoints and categories by autonomous agents in a time window, with total and agent-only probe counts. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
+      "Paid, $0.01 USDC on Base via x402. x402 agent demand trends: the most-requested x402 endpoints (service, endpoint, probes, agent_probes) and the categories with data, in a time window (24h, 7d, 30d or all; limit 1-100). Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_category_demand",
@@ -113,7 +113,7 @@ const TOOLS = [
       openWorldHint: true,
     },
     description:
-      "Paid, $0.02 USDC on Base via x402. x402 category demand depth: probe volume, agent probes, conversions, price points probed and a daily series for one API category. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
+      "Paid, $0.02 USDC on Base via x402. x402 category demand depth for one API category: summary (probes, agent_probes, conversions), price points probed and a daily series. The category must be one publishers report (get_intent_trends lists categories that have data); a category with no reported traffic in the window answers 404 no_data and is not charged. Without WALLET_PRIVATE_KEY, returns the x402 payment challenge instead of settling.",
   },
   {
     name: "get_intent_report",
@@ -125,7 +125,7 @@ const TOOLS = [
       openWorldHint: true,
     },
     description:
-      "x402 conversion funnel report for one service (why agents probe but do not pay): bounce funnel, traffic classes, top abandoned endpoints, retry signals. FREE with X402_ADS_PUBLISHER_KEY for your registered services (the service id is bound to your key at registration); otherwise $0.05 USDC on Base via x402. Without a publisher key or WALLET_PRIVATE_KEY, returns the x402 payment challenge.",
+      "x402 conversion funnel report for one service (why agents probe but do not pay): funnel (total_probes, bounces, paid, conversion_rate), traffic_classes and top_abandoned_endpoints. Data exists only for services that report through the publisher middleware; a service with no events in the window answers 404 no_data and is not charged. FREE with X402_ADS_PUBLISHER_KEY for your registered services (the service id is bound to your key at registration); otherwise $0.05 USDC on Base via x402. Without a publisher key or WALLET_PRIVATE_KEY, returns the x402 payment challenge.",
   },
   {
     name: "get_terms",
@@ -186,7 +186,7 @@ async function paidGet(path) {
     const viaPublisherKey = !!process.env.X402_ADS_PUBLISHER_KEY;
     return { paid: false, ...(viaPublisherKey ? { free_via_publisher_key: true } : {}), data: JSON.parse(res.text) };
   }
-  if (res.status !== 402) throw new Error(`GET ${path} failed: ${res.status} ${res.text.slice(0, 200)}`);
+  if (res.status !== 402) throw guard.httpError(res, `GET ${path} failed: `, false); // nothing was signed, so nothing was charged
 
   const httpClient = walletClient();
   if (!httpClient) {
@@ -210,7 +210,7 @@ async function paidGet(path) {
 
 async function freeGet(path, asText = false) {
   const res = await guard.fetchBounded(path);
-  if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
+  if (!res.ok) throw guard.httpError(res, `GET ${path} failed: `, false);
   return asText ? res.text : JSON.parse(res.text);
 }
 
@@ -238,7 +238,7 @@ async function callTool(name, args = {}) {
         category: args.category,
       }),
     });
-    if (!res.ok) throw new Error(`POST /v1/decide failed: ${res.status}`);
+    if (!res.ok) throw guard.httpError(res, "POST /v1/decide failed: ", false);
     return JSON.parse(res.text);
   }
 
@@ -280,7 +280,7 @@ for (const tool of TOOLS) {
       } catch (error) {
         return {
           isError: true,
-          content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
+          content: [{ type: "text", text: (error instanceof Error ? error.message : String(error)) + (error && typeof error.charged === "boolean" ? ` (charged: ${error.charged})` : "") }],
         };
       }
     }
